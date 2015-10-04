@@ -1,2 +1,1 @@
-var to = "world";
-console.log(`Hello, ${to}`);
+var helper = require('./helper.js');
