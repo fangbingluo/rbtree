@@ -3,99 +3,146 @@ function rbtree()
 	this.root = null;
 }
 
-function Node(key, lChild, rChild, color, sibling)
+function Node(key, lChild, rChild, color)
 {
 	this.key = key;
 	this.lChild = lChild;
 	this.rChild = rChild;
 	this.color = color;
-	this.sibling = sibling;
+	this.parent = null;
 }
 
 
 
 rbtree.prototype = 
 {
-	getGrandparent: function(pNode)
+
+	getUncle: function(node)
 	{
-		if(pNode == root)
-			return false;
-		var temp = root;
-		var gradPa = null;
-		//console.log(temp + ' and ' + pNode)
-		while(temp.key != pNode.key)
-		{
-			if(pNode.key > temp.key)
-			{
-				gradPa = temp;
-				temp = temp.rChild;
-			}
-			else if(pNode.key < temp.key)
-			{
-				gradPa = temp;
-				temp = temp.lChild;
-			}
-			else 
-				return false
-		}
-		return gradPa;
+		var gradPa = this.getGrandparent(node);
+		if (gradPa == null)
+			return null;
+		if (node.parent == gradPa.lChild)
+			return gradPa.rChild;
+		else
+			return gradPa.lChild; 
+	},
+	getGrandparent: function(node)
+	{
+		if(node!= null && node.parent != null)
+			return node.parent.parent;
+		else
+			return null;	
 	},
 
-	leftRotate: function(grandpa, parent, node)
+	constraints1: function(node)
 	{
-		var parentOfGradPa = this.getGrandparent(grandpa);
-		/*if(parentOfGradPa != false)
+		if(node.parent == null)
+			node.color = 'black';
+		else
+			this.constraints2(node);
+	},
+
+	constraints2: function(node)
+	{
+		if(node.parent.color == 'black')
+			return;
+		else
+			this.constraints3(node);
+	},
+	constraints3: function(node)
+	{
+		var uncle = this.getUncle(node);
+		if(uncle!= null && uncle.color == 'red')
 		{
-			if (parentOfGradPa.lChild == grandpa)
-				parentOfGradPa.lChild = parent;
-			else if(parentOfGradPa.rChild == grandpa)
-				parentOfGradPa.rChild = parent; 
+			node.parent.color = 'balck';
+			uncle.color = 'black';
+			var gradPa = this.getGrandparent(node);
+			gradPa.color = 'red';
+			this.constraints1(gradPa);
+		} else {
+
+			this.constraints4(node);
+		}
+	},
+	constraints4: function(node)
+	{
+		var gradPa = this.getGrandparent(node);
+		if( node == node.parent.rChild && node.parent == gradPa.lChild)
+		{
+			temp1 = node.parent.lChild;
+			temp2 = node.lChild;
+			gradPa.lChild = node;
+			node.lChild = temp1;
+			temp1.rChild = temp2;
+			node = node.lChild;
+		}
+		else if((node == node.parent.lChild) && (node.parent == gradPa.rChild))
+		{
+			temp1 = node.parent.rChild;
+			temp2 = node.rChild;
+			gradPa.rChild = node;
+			node.rChild = temp1;
+			temp1.lChild = temp2;
+			node = node.rChild;
+		}
+		this.constraints5(node);
+
+	},
+	constraints5: function(node)
+	{
+		var gradPa = this.getGrandparent(node);
+		node.parent.color = 'black';
+		gradPa.color = 'red';
+		if(gradPa == this.root)
+		{
+			this.root = node.parent;
+			node.parent.parent = null;
+		}
+		if(gradPa.parent != null)
+		{
+
+			if(gradPa == gradPa.parent.lChild)
+				gradPa.parent.lChild = node.parent;
+			else if(gradPa == gradPa.parent.rChild)
+				gradPa.parent.rChild = node.parent;
+		}
+		if(node == node.parent.lChild)
+		{
+
+			temp1 = node.parent.rChild;
+			node.parent.rChild = gradPa;
+			gradPa.lChild = temp1;
 		}
 		else
-		{*/
-			this.root = parent;
-		//}
-		grandpa.rChild = parent.lChild;
-		parent.lChild = grandpa;
-		console.log(root)
-		grandpa.color = 'red';
-		parent.color = 'black';
-
+		{
+			temp1 = node.parent.lChild;
+			node.parent.lChild = gradPa;
+			gradPa.rChild = temp1;
+		}
 	},
 
-	
-	constraints: function(pNode, node)
+	output: function()
 	{
-		var gradPa = this.getGrandparent(pNode);
-		if(this.root.color == 'red')
-			this.root.color = 'black';
-		else if(pNode.color == 'red' && pNode.sibling != null && pNode.sibling.color == 'red')
-		{
-			pNode.color = 'black';
-			pNode.sibling.color = 'black';
-			gradPa.color = 'red';
-		} 
-		else if(pNode.sibling == null && pNode.color == 'red')
-		{
-			this.leftRotate(gradPa,pNode,node);
-		}
+		var temp = this.root;
+		console.log(tree)
 	},
 
 	insert: function(key)
 	{
-		var insertNode = new Node(key, null, null, 'red', null);
+		var insertNode = new Node(key, null, null, 'red');
 		if(this.root == null)
 		{
 			this.root = insertNode;
-			this.root.color = 'black';
+			this.parent == null;
+			this.constraints1(insertNode);
 		}
 		else
 		{
 			var temp = this.root;
-			var parent = null;
 			while(temp != null)
 			{
-				parent = temp;
+				insertNode.parent = temp;
 				if(key > temp.key)
 					temp = temp.rChild;
 				else if(key < temp.key)
@@ -106,37 +153,22 @@ rbtree.prototype =
 					break;
 				}
 			}
-			if(key < parent.key)
-			{
-				parent.lChild = insertNode;
-				if(parent.rChild != null)
-				{
-					parent.lChild.sibling = parent.rChild;
-					parent.rChild.sibling = parent.lChild;
-				}
-			}
-			else if(key > parent.key)
-			{
-				parent.rChild = insertNode;
-				if(parent.lChild != null)
-				{
-					parent.rChild.sibling = parent.lChild;
-					parent.lChild.sibling = parenr.rChild;
-				}
-			}
-
-			this.constraints(parent, insertNode);
+			if(key < insertNode.parent.key)
+				insertNode.parent.lChild = insertNode;
+			else if(key > insertNode.parent.key)
+				insertNode.parent.rChild = insertNode;
+	
+			
+			this.constraints1(insertNode);
 		}		
+
 	}
+
 }
 
 var tree = new rbtree();
 tree.insert(1);
 tree.insert(2);
 tree.insert(3);
-var temp = tree.root;
-while(temp != null)
-{
-	console.log("key = " + temp.key + " lchild = " + temp.lChild + "rChild = " + temp.rChild + " color = " + temp.color);
-	temp = temp.rChild;
-}
+tree.insert(4);
+tree.output();
