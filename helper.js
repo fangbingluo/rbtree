@@ -12,8 +12,6 @@ function Node(key, lChild, rChild, color)
 	this.parent = null;
 }
 
-
-
 rbtree.prototype = 
 {
 
@@ -87,13 +85,14 @@ rbtree.prototype =
 			node = node.rChild;
 		}
 		this.constraints5(node);
-
+	
 	},
 	constraints5: function(node)
 	{
 		var gradPa = this.getGrandparent(node);
 		node.parent.color = 'black';
 		gradPa.color = 'red';
+
 		if(gradPa == this.root)
 		{
 			this.root = node.parent;
@@ -113,12 +112,14 @@ rbtree.prototype =
 			temp1 = node.parent.rChild;
 			node.parent.rChild = gradPa;
 			gradPa.lChild = temp1;
+			gradPa.parent = node.parent;
 		}
 		else
 		{
 			temp1 = node.parent.lChild;
 			node.parent.lChild = gradPa;
 			gradPa.rChild = temp1;
+			gradPa.parent = node.parent;
 		}
 	},
 
@@ -168,7 +169,12 @@ rbtree.prototype =
 
 var tree = new rbtree();
 tree.insert(1);
-tree.insert(2);
+tree.insert(5);
+tree.insert(7);
 tree.insert(3);
 tree.insert(4);
+tree.insert(2);
+tree.insert(6);
+tree.insert(9);
+
 tree.output();
