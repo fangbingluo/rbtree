@@ -163,6 +163,85 @@ rbtree.prototype =
 			this.constraints1(insertNode);
 		}		
 
+	},
+
+	getSibling: function(node)
+	{
+		if(node == node.parent.lChild)
+			return node.parent.rChild;
+		else
+			return n.parent.lChild;
+	},
+
+	rotate_left: function(node)
+	{
+		temp = sibling.lChild;
+		if(node.parent.parent != null)
+		{
+			sibling.parent = node.parent.parent;
+			if(node.parent == node.parent.parent.lChild)
+				node.parent.parent.lChild = sibling;
+			else
+				node.parent.parent.rChild = sibling;
+		}	
+		node.parent.parent = sibling;
+		sibling.lChild = node.parent;
+		node.parent.rChild = temp;
+	}
+
+	deConstraints1: function(node)
+	{
+		if(node.parent != null)
+			this.deConstraints2(node);
+	},
+
+	deConstraints2: function(node)
+	{
+		var sibling = this.getSibling(node);
+
+		if(sibling.color == 'red')
+		{
+			node.parent.color = 'red';
+			sibling.color = 'black';
+			if(node == node.parent.lChild)
+				this.rotate_left(node);
+			else if(node == node.parent.rChild)
+				
+		}
+	},
+
+
+	delete: function(key)
+	{
+		var temp = this.root;
+		while(temp != null)
+		{
+			if(key > temp.key)
+				temp = temp.rChild;
+			else if(key < temp.key)
+				temp = temp.lChild;
+			else
+				break;
+		}
+		if(temp.lChild != null)
+			var child = temp.lChild;
+		else if( temp.rChild != null)
+			var child = temp.rChild;
+
+		//replace node
+		child.parent = temp.parent;
+		if(temp = temp.parent.lChild)
+			temp.parent.lChild = child;
+		else if(temp = temp.parent.rChild)
+			temp.parent.rChild = child;
+
+		if(temp.color == 'black')
+		{
+			if(child.color == 'red')
+				child.color = 'black';
+			else
+				this.deConstraints1(child);	
+		}
 	}
 
 }
