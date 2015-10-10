@@ -169,14 +169,23 @@ rbtree.prototype =
 
     getSibling: function(node)
     {
-        if(node == node.parent.lChild)
+        if(node.parent == null)
+            return null;
+        if(node.parent.lChild == null)
+            return null;
+        else if(node.parent.rChild == null)
+            return null;
+        else if(node.parent.lChild == node)
             return node.parent.rChild;
         else
-            return n.parent.lChild;
+            return node.parent.lChild;
     },
 
     rotate_left: function(node)
     {
+        var sibling = this.getSibling(node);
+        if(sibling == null)
+            return null;
         temp = sibling.lChild;
         if(node.parent.parent != null)
         {
@@ -196,7 +205,9 @@ rbtree.prototype =
 
     rotate_right: function(node)
     {
-        temp = sibling.rChild;
+        var sibling = this.getSibling(node);
+        if(sibling == null)
+            return null;
         if(node.parent.parent != null)
         {
             sibling.parent = node.parent.parent;
@@ -225,7 +236,7 @@ rbtree.prototype =
 
         if(sibling.color == 'red')
         {
-            node.parent.color = 'red';
+            node.parent.color = 'red'; 
             sibling.color = 'black';
             if(node == node.parent.lChild)
                 this.rotate_left(node);
@@ -273,13 +284,13 @@ rbtree.prototype =
             {
                 sibling.color = 'red';
                 sibling.lChild.color = 'black';
-                rotate_right(sibling);
+                this.rotate_right(sibling);
             }
             else if((node == node.parent.rChild) && (sibling.lChild.color == 'black') && (sibling.rChild.color == 'red'))
             {
                 sibling.color = 'red';
                 sibling.rChild.color = 'black';
-                rotate_left(sibling);
+                this.rotate_left(sibling);
             }
         }
         this.deConstraints6(node);
@@ -292,13 +303,17 @@ rbtree.prototype =
         node.parent.color = 'black';
         if(node == node.parent.lChild)
         {
-            sibling.rChild.color = 'black';
-            rotate_left(node.parent);
+            if(sibling.rChild != null)
+                sibling.rChild.color = 'black';
+
+            this.rotate_left(node.parent);
         }
         else
         {
-            sibling.lChild.color = 'black';
-            rotate_right(node.parent);
+            if(sibling.lChild != null)
+                sibling.lChild.color = 'black';
+
+            this.rotate_right(node.parent);
         }
     },   
 
@@ -314,24 +329,38 @@ rbtree.prototype =
             else
                 break;
         }
-        if(temp.lChild != null)
-            var child = temp.lChild;
-        else if( temp.rChild != null)
-            var child = temp.rChild;
 
-        //replace node
-        child.parent = temp.parent;
-        if(temp = temp.parent.lChild)
-            temp.parent.lChild = child;
-        else if(temp = temp.parent.rChild)
-            temp.parent.rChild = child;
-
-        if(temp.color == 'black')
+        if(temp.lChild == null && temp.rChild == null)
         {
-            if(child.color == 'red')
-                child.color = 'black';
+            if(temp.color == 'red')
+                temp = null;
             else
-                this.deConstraints1(child); 
+            {
+                this.deConstraints1(temp);
+                temp = null;
+            }
+        }
+        else
+        {
+            if(temp.lChild != null)
+                var child = temp.lChild;
+            else if( temp.rChild != null)
+                var child = temp.rChild;
+
+            //replace node
+            child.parent = temp.parent;
+            if(temp = temp.parent.lChild)
+                temp.parent.lChild = child;
+            else if(temp = temp.parent.rChild)
+                temp.parent.rChild = child;
+
+            if(temp.color == 'black')
+            {
+                if(child.color == 'red')
+                    child.color = 'black';
+                else
+                    this.deConstraints1(child); 
+            }
         }
     }
 
@@ -343,5 +372,7 @@ tree.insert(5);
 tree.insert(7);
 tree.insert(3);
 tree.delete(3);
+//tree.delete(7);
+
 
 tree.output();
